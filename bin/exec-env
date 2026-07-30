@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Sets JAVA_HOME using /usr/libexec/java_home.
+# Version and arch selection is done via JAVA_VERSION and JAVA_ARCH env vars,
+# which /usr/libexec/java_home reads natively.
+JAVA_HOME_CMD="${JAVA_HOME_CMD:-/usr/libexec/java_home}"
+export JAVA_HOME="$("$JAVA_HOME_CMD")"

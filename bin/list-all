@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Returns the single sentinel version this plugin supports.
+# Real version selection happens via JAVA_VERSION + JAVA_ARCH in bin/exec-env.
+echo "auto"

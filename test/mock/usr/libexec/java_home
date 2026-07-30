@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Mock /usr/libexec/java_home for tests.
+# Reads JAVA_VERSION and JAVA_ARCH env vars, same as the real /usr/libexec/java_home.
+# Note: -V (list all) is not implemented here — bin/list-all does not use it currently.
+
+version="${JAVA_VERSION:-}"
+arch="${JAVA_ARCH:-}"
+
+# Lookup table: version_prefix:arch -> path
+declare -A HOMES
+HOMES["20:arm64"]="/jvms/azul-20.0.2-aarch64/Contents/Home"
+HOMES["20.0.2:arm64"]="/jvms/azul-20.0.2-aarch64/Contents/Home"
+HOMES["17:arm64"]="/jvms/zulu-17-arm64/Contents/Home"
+HOMES["17.0.13:arm64"]="/jvms/zulu-17-arm64/Contents/Home"
+HOMES["17:x86_64"]="/jvms/zulu-17-x86_64/Contents/Home"
+HOMES["17.0.18:x86_64"]="/jvms/zulu-17-x86_64/Contents/Home"
+HOMES["11:arm64"]="/jvms/zulu-11-arm64/Contents/Home"
+HOMES["11.0.23:arm64"]="/jvms/zulu-11-arm64/Contents/Home"
+HOMES["11:x86_64"]="/jvms/azul-11.0.20-x86_64/Contents/Home"
+HOMES["11.0.20:x86_64"]="/jvms/azul-11.0.20-x86_64/Contents/Home"
+
+# No version or arch: return system default (highest version, native arch)
+if [[ -z "$version" && -z "$arch" ]]; then
+  echo "/jvms/azul-20.0.2-aarch64/Contents/Home"
+  exit 0
+fi
+
+# No arch: pick arm64 first (simulates macOS native default)
+if [[ -z "$arch" ]]; then
+  for candidate_arch in arm64 x86_64; do
+    candidate="${version}:${candidate_arch}"
+    if [[ -n "${HOMES[$candidate]+x}" ]]; then
+      echo "${HOMES[$candidate]}"
+      exit 0
+    fi
+  done
+fi
+
+# No version: pick highest version for given arch
+if [[ -z "$version" ]]; then
+  for candidate_version in 20 20.0.2 17 17.0.18 11 11.0.23; do
+    candidate="${candidate_version}:${arch}"
+    if [[ -n "${HOMES[$candidate]+x}" ]]; then
+      echo "${HOMES[$candidate]}"
+      exit 0
+    fi
+  done
+fi
+
+key="${version}:${arch}"
+if [[ -n "${HOMES[$key]+x}" ]]; then
+  echo "${HOMES[$key]}"
+  exit 0
+fi
+
+# Silent fallback to system default, same as real /usr/libexec/java_home
+echo "/jvms/azul-20.0.2-aarch64/Contents/Home"
+exit 0
