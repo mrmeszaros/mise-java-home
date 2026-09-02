@@ -1,7 +1,7 @@
 #!/usr/bin/env bats
 
 setup() {
-  export JAVA_HOME_CMD="$BATS_TEST_DIRNAME/mock/usr/libexec/java_home"
+  export JAVA_HOME_CMD="$BATS_TEST_DIRNAME/mock_java_home"
   EXEC_ENV="$BATS_TEST_DIRNAME/../bin/exec-env"
   cd "$BATS_TEST_TMPDIR"
   unset JAVA_VERSION JAVA_VENDOR JAVA_HOME JAVA_ARCH

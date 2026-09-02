@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Mock /usr/libexec/java_home for tests.
+# Reads JAVA_VERSION and JAVA_ARCH env vars, same as the real /usr/libexec/java_home.
+
+declare -A HOMES
+# exact lookups
+HOMES["25:arm64"]="/jvms/zulu-25-arm64/Contents/Home"
+HOMES["21:arm64"]="/jvms/zulu-21-arm64/Contents/Home"
+HOMES["21.0.4:arm64"]="/jvms/temurin-21.0.4-arm64/Contents/Home"
+HOMES["17:arm64"]="/jvms/zulu-17-arm64/Contents/Home"
+HOMES["17:x86_64"]="/jvms/zulu-17-x86_64/Contents/Home"
+HOMES["17.0.18:x86_64"]="/jvms/zulu-17-x86_64/Contents/Home"
+# defaulting: version only → arm64
+HOMES["17:"]="/jvms/zulu-17-arm64/Contents/Home"
+# defaulting: arch only → highest version
+HOMES[":x86_64"]="/jvms/zulu-17-x86_64/Contents/Home"
+# defaulting: no version, no arch → system default
+HOMES[":"]="/jvms/system-default/Contents/Home"
+
+key="${JAVA_VERSION:-}:${JAVA_ARCH:-}"
+echo "${HOMES[$key]:-/jvms/system-default/Contents/Home}"
