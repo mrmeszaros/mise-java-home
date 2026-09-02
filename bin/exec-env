@@ -7,6 +7,15 @@
 #   1. .sdkmanrc  (java=VERSION-vendor)
 #   2. .java-version  (VERSION)
 
+debug_log() {
+  [[ -n "${MISE_DEBUG:-}" ]] || return 0
+  local c_on c_off
+  if [[ -z "${NO_COLOR:-}" && "${MISE_COLOR:-}" != "0" && -t 2 ]]; then
+    c_on=$'\033[35m' c_off=$'\033[0m'
+  fi
+  echo "${c_on}DEBUG${c_off} [java-home] $*" >&2
+}
+
 # Sets JAVA_VERSION and JAVA_VENDOR from .sdkmanrc in cwd, if present.
 # No-op if .sdkmanrc is absent or has no java= line.
 parse_sdkmanrc() {
@@ -24,8 +33,10 @@ parse_sdkmanrc() {
     else
       JAVA_VERSION="$version"
     fi
+    debug_log "parsed .sdkmanrc: version=$JAVA_VERSION vendor=$JAVA_VENDOR (raw: $value)"
   else
     JAVA_VERSION="$value"
+    debug_log "parsed .sdkmanrc: version=$JAVA_VERSION (no vendor)"
   fi
 }
 
@@ -34,14 +45,20 @@ parse_sdkmanrc() {
 parse_java_version_file() {
   [[ -f ".java-version" ]] || return
   JAVA_VERSION="$(cat .java-version)"
+  debug_log "parsed .java-version: version=$JAVA_VERSION"
 }
 
 # ── resolution chain ─────────────────────────────────────────────────────────
+if [[ -n "${JAVA_VERSION:-}" ]]; then
+  debug_log "using JAVA_VERSION from environment: $JAVA_VERSION"
+fi
 [[ -z "${JAVA_VERSION:-}" ]] && parse_sdkmanrc
 [[ -z "${JAVA_VERSION:-}" ]] && parse_java_version_file
+[[ -z "${JAVA_VERSION:-}" ]] && debug_log "no version found, using system default"
 
 # ── invoke java_home ─────────────────────────────────────────────────────────
 JAVA_HOME_CMD="${JAVA_HOME_CMD:-/usr/libexec/java_home}"
 [[ -n "${JAVA_VERSION:-}" ]] && export JAVA_VERSION
 [[ -n "${JAVA_ARCH:-}" ]]    && export JAVA_ARCH
 export JAVA_HOME="$("$JAVA_HOME_CMD")"
+debug_log "resolved JAVA_HOME=$JAVA_HOME"

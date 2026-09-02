@@ -43,6 +43,17 @@ JAVA_ARCH = "x86_64"
 All three variables can be set at any configuration level: per project in `mise.toml` or
 globally in `~/.config/mise/config.toml` (See [mise configuration](https://mise.jdx.dev/configuration.html)).
 
+### Debugging
+
+Set `MISE_DEBUG=1` to see how the plugin resolves `JAVA_HOME`:
+
+```shell
+MISE_DEBUG=1 mise env
+```
+
+The plugin logs which version file was found, what version and vendor were parsed,
+and the final resolved `JAVA_HOME`.
+
 ### Caveats
 
 mise caches the resolved `JAVA_HOME`. If you change `JAVA_VERSION`, `JAVA_ARCH`, or `JAVA_HOME_CMD` in your
