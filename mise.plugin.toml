@@ -1,0 +1,13 @@
+[exec-env]
+# Cache exec-env output per (directory, JAVA_VERSION, JAVA_ARCH) tuple.
+# This ensures mise re-runs exec-env when changing into a directory with a
+# different .sdkmanrc or .java-version, rather than serving a stale cached result.
+#
+# Limitation: editing .sdkmanrc or .java-version in-place within the same
+# directory does not bust this cache. Workaround: `mise cache clear`.
+# Full per-file mtime tracking would require migrating to a Lua env plugin.
+cache-key = [
+  "{{ cwd }}",
+  "{{ env.JAVA_VERSION | default(value='') }}",
+  "{{ env.JAVA_ARCH | default(value='') }}"
+]

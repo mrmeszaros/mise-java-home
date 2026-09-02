@@ -56,15 +56,21 @@ and the final resolved `JAVA_HOME`.
 
 ### Caveats
 
-mise caches the resolved `JAVA_HOME`. If you change `JAVA_VERSION`, `JAVA_ARCH`, or `JAVA_HOME_CMD` in your
-shell after the cache is warm, mise will keep serving the stale value until you run:
+mise caches the resolved `JAVA_HOME` per directory. The cache is keyed on the current
+directory, `JAVA_VERSION`, and `JAVA_ARCH`, so it invalidates correctly when you change
+directories or update these variables in `mise.toml`.
+
+Two cases still require a manual cache clear:
+
+- Editing `.sdkmanrc` or `.java-version` **in-place** in the same directory
+- Changing `JAVA_VERSION`, `JAVA_ARCH`, or `JAVA_HOME_CMD` via shell `export` rather than in `mise.toml`
 
 ```shell
 mise cache clear
 ```
 
-To avoid this, always set `JAVA_VERSION`, `JAVA_ARCH`, and `JAVA_HOME_CMD` in `mise.toml [env]` rather than
-as shell exports. The cache invalidates correctly when `mise.toml` changes.
+To avoid stale results, prefer setting `JAVA_VERSION`, `JAVA_ARCH`, and `JAVA_HOME_CMD`
+in `mise.toml [env]` rather than as shell exports.
 
 ## Development
 
