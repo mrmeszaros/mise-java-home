@@ -1,0 +1,3 @@
+[tools]
+bats = "latest"
+editorconfig-checker = "latest"

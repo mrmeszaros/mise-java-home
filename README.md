@@ -22,14 +22,14 @@ mise plugins install java-home git@github.com:mrmeszaros/mise-java-home.git
 ### Usage
 
 - `JAVA_VERSION`
-	- version prefix passed to the discovery command (`"17"` matches any 17.x)
-	- default: system default (highest)
+    - version prefix passed to the discovery command (`"17"` matches any 17.x)
+    - default: system default (highest)
 - `JAVA_ARCH`
-	- `arm64` or `x86_64`
-	- default: system default
+    - `arm64` or `x86_64`
+    - default: system default
 - `JAVA_HOME_CMD`
-	- discovery command, override only if needed
-	- default: `/usr/libexec/java_home`
+    - discovery command, override only if needed
+    - default: `/usr/libexec/java_home`
 
 ```toml
 [tools]
@@ -62,26 +62,22 @@ as shell exports. The cache invalidates correctly when `mise.toml` changes.
 The plugin implements three mise hooks:
 
 - `bin/post-plugin-add`:
-	- creates the `auto` marker directory so mise considers the version installed without a separate `mise install` step
+    - creates the `auto` marker directory so mise considers the version installed without a separate `mise install` step
 - `bin/list-all`:
-	- returns the single sentinel version `auto`; real version selection happens via env vars at runtime
+    - returns the single sentinel version `auto`; real version selection happens via env vars at runtime
 - `bin/exec-env`:
-	- calls `JAVA_HOME_CMD` with `JAVA_VERSION` and `JAVA_ARCH` from the environment, then exports `JAVA_HOME`
+    - calls `JAVA_HOME_CMD` with `JAVA_VERSION` and `JAVA_ARCH` from the environment, then exports `JAVA_HOME`
 
 See the [mise plugin development guide](https://mise.jdx.dev/plugins.html) for the full hook interface.
 
 ### Running tests
 
-Install [bats](https://github.com/bats-core/bats-core):
+Requires [bats](https://github.com/bats-core/bats-core) and [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker).
 
 ```shell
-brew install bats-core
-```
-
-Run the test suite:
-
-```shell
-make test
+mise install   # install dev dependencies
+make test      # run tests
+make lint      # check formatting
 ```
 
 Tests use a mock `java_home` script via `JAVA_HOME_CMD` and do not require any JDKs to be installed.
