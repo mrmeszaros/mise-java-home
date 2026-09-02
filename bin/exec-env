@@ -2,5 +2,46 @@
 # Sets JAVA_HOME using /usr/libexec/java_home.
 # Version and arch selection is done via JAVA_VERSION and JAVA_ARCH env vars,
 # which /usr/libexec/java_home reads natively.
+#
+# If JAVA_VERSION is not set, falls back to idiomatic version files in order:
+#   1. .sdkmanrc  (java=VERSION-vendor)
+#   2. .java-version  (VERSION)
+
+# Sets JAVA_VERSION and JAVA_VENDOR from .sdkmanrc in cwd, if present.
+# No-op if .sdkmanrc is absent or has no java= line.
+parse_sdkmanrc() {
+  [[ -f ".sdkmanrc" ]] || return
+  local value
+  value="$(grep '^java=' .sdkmanrc | cut -d= -f2)"
+  [[ -n "$value" ]] || return
+  if [[ "$value" == *-* ]]; then
+    # Split on last hyphen: left is version, right is vendor.
+    JAVA_VENDOR="${value##*-}"
+    local version="${value%-*}"
+    # Zulu: /usr/libexec/java_home only matches on major version for zulu JDKs.
+    if [[ "$JAVA_VENDOR" == "zulu" ]]; then
+      JAVA_VERSION="${version%%.*}"
+    else
+      JAVA_VERSION="$version"
+    fi
+  else
+    JAVA_VERSION="$value"
+  fi
+}
+
+# Sets JAVA_VERSION from .java-version in cwd, if present.
+# No-op if file is absent.
+parse_java_version_file() {
+  [[ -f ".java-version" ]] || return
+  JAVA_VERSION="$(cat .java-version)"
+}
+
+# ── resolution chain ─────────────────────────────────────────────────────────
+[[ -z "${JAVA_VERSION:-}" ]] && parse_sdkmanrc
+[[ -z "${JAVA_VERSION:-}" ]] && parse_java_version_file
+
+# ── invoke java_home ─────────────────────────────────────────────────────────
 JAVA_HOME_CMD="${JAVA_HOME_CMD:-/usr/libexec/java_home}"
+[[ -n "${JAVA_VERSION:-}" ]] && export JAVA_VERSION
+[[ -n "${JAVA_ARCH:-}" ]]    && export JAVA_ARCH
 export JAVA_HOME="$("$JAVA_HOME_CMD")"
